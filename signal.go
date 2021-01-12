@@ -9,9 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// sysSigListener : sets up a listener to the system signals and when the signal actually occurs this will indicate by closing the cancel channel
+// SysSignalListener : sets up a listener to the system signals and when the signal actually occurs this will indicate by closing the cancel channel
 // We intend to make a closure of this sort so that we can re-use the same
-func sysSigListener() (func(), chan interface{}) {
+func SysSignalListener() (func(), chan interface{}) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	interrupt := make(chan interface{}, 1) // system interrupt is communicated by closing this channel
