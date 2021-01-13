@@ -2,6 +2,7 @@ package utilities
 
 import (
 	"os"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -19,7 +20,8 @@ func SetUpLog() {
 
 // CustomLog : depending on the flags sent in this can alter the log levels and redirect the output
 // send in the logfile path so that incase of file logging this can create and and setupout to the file
-func CustomLog(flog, fverbose bool, logFile string) {
+func CustomLog(flog, fverbose bool, logFile string) func() {
+	var lf *os.File
 	if flog {
 		lf, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
 		if err != nil {
@@ -27,13 +29,20 @@ func CustomLog(flog, fverbose bool, logFile string) {
 			log.Error("Failed to connect to log file, kindly check the privileges")
 			// If this fails to connect to log file, it defaults to sending the log output to stdout
 		} else {
-			log.Infof("Check log file %s for entries", logFile)
+			log.Infof("Check log file for entries @ %s", logFile)
 			log.SetOutput(lf)
-			defer lf.Close()
 		}
 	}
 	if fverbose {
 		log.Info("Verbose logging")
 		log.SetLevel(log.TraceLevel)
+	}
+	var once sync.Once
+	return func() {
+		once.Do(func() {
+			if lf != nil {
+				lf.Close()
+			}
+		})
 	}
 }
