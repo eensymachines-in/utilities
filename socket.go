@@ -2,9 +2,6 @@ package utilities
 
 import (
 	"net"
-	"os"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // ListenOnUnixSocket : sets up a listener, returns a function to start, stop and error incase the socket could not be listened
@@ -34,10 +31,8 @@ func ListenOnUnixSocket(sock string, handler func(net.Conn)) (func(), func(), er
 	}
 	stop := func() {
 		l.Close()
-		err := os.RemoveAll(sock) // for the next run we need the file to be removed .. this is part of server cleanup
-		if err != nil {
-			log.Errorf("Failed to clear socket %s", err)
-		}
+		// the socket is removed in the client code not here.
+		// we tried doing that but does not help, since the stop function is not allowed too much time
 	}
 	return start, stop, nil
 }
