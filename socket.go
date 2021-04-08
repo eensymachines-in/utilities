@@ -52,3 +52,27 @@ func ListenOnUnixSocket(sock string, handler func(net.Conn)) (func(), func(), er
 	}
 	return start, stop, nil
 }
+
+// AfterSocketEvent : this sets up a listener to a socket, and calls the play function only after the socket has received an event
+// caller function can set the size of the expected event message - defaults to 512 if set to lesser than that
+// returns a func to stop the event loop, and error incase any
+func AfterSocketEvent(sock string, play func(msg []byte), size int) (func(), error) {
+	if size < 512 {
+		// incoming message size if not set by the caller code - it defaults to 512
+		size = 512
+	}
+	start, stop, err := ListenOnUnixSocket(sock, func(c net.Conn) {
+		buf := make([]byte, size)
+		nr, err := c.Read(buf)
+		if err != nil {
+			return
+		}
+		data := buf[0:nr]
+		play(data)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Failed to setup AfterSocket event :%s", err)
+	}
+	go start()
+	return stop, nil
+}

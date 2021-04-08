@@ -8,6 +8,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -56,4 +57,17 @@ func TestSockListener(t *testing.T) {
 	data, _ := json.Marshal(map[string]bool{"interrupt": true})
 	c.Write(data)
 	<-time.After(5 * time.Second)
+}
+
+func TestAfterSockEvent(t *testing.T) {
+	stop, err := AfterSocketEvent("./test.sock", func(data []byte) {
+		t.Log("We have received data over the test socket")
+		t.Log(string(data))
+	})
+	defer stop()
+	assert.Nil(t, err, "Unexpected error in setting up the after socket event")
+	if err != nil {
+		panic(err)
+	}
+	<-time.After(5 * time.Minute) //wait for netcat to send the data
 }
