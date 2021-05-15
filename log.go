@@ -9,10 +9,11 @@ import (
 
 // SetUpLog : here this is set up the most vanilla log preferences to get any module started
 func SetUpLog() {
-	log.SetFormatter(&log.TextFormatter{
-		DisableColors: false,
-		FullTimestamp: true,
-	})
+	// log.SetFormatter(&log.TextFormatter{
+	// 	DisableColors: false,
+	// 	FullTimestamp: true,
+	// })
+	log.SetFormatter(&log.JSONFormatter{})
 	log.SetReportCaller(false)
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel) // default is info level, if verbose then trace
