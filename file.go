@@ -15,7 +15,7 @@ type FileAction func(string) (interface{}, error)
 // Upon finding a change - will callback where the client code can do what it needs to
 // lower the tick time duration, faster is the file change detect, but higher is the load on CPU
 // FileAction is called everytime the file is found to have been changed. FileAction is customizable on the client side
-func FileWatcher(path string, cancel, errx chan interface{}, tick time.Duration, fa FileAction) (chan interface{}, func()) {
+func FileWatcher(path string, cancel chan interface{}, errx chan error, tick time.Duration, fa FileAction) (chan interface{}, func()) {
 	out := make(chan interface{}, 2)
 	return out, func() {
 		defer close(out)
