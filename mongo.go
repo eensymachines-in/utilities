@@ -57,3 +57,19 @@ func MongoConnect(server, user, passwd, dbname string) gin.HandlerFunc {
 		c.Set("mongo-database", client.Database(dbname))
 	}
 }
+
+// MongoPingTest : will do a simple ping test to see if the server is reachable
+func MongoPingTest(server, user, passwd string) error {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s", user, passwd, server)))
+	if err != nil || client == nil {
+		return fmt.Errorf("failed to connect to mongo server %s", err)
+	}
+	err = client.Ping(ctx, readpref.Primary())
+	if err != nil {
+		return fmt.Errorf("failed to ping server %s", err)
+	}
+	log.Info("database is reachable..")
+	defer client.Disconnect(ctx) // purpose of this connection is served
+	return nil
+}
