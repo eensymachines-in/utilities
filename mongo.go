@@ -36,7 +36,7 @@ func MongoConnectURI(uri, dbname string) gin.HandlerFunc {
 func MongoConnect(server, user, passwd, dbname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-		client, err := mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:27017", user, passwd, server)))
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s", user, passwd, server)))
 		if err != nil {
 			httperr.HttpErrOrOkDispatch(c, httperr.ErrGatewayConnect(err), log.WithFields(log.Fields{
 				"stack":  "MongoConnect",
