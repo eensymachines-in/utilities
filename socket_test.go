@@ -1,3 +1,5 @@
+//go:build exclude
+
 package utilities
 
 import (
@@ -21,8 +23,10 @@ func init() {
 	log.SetLevel(log.TraceLevel) // default is info level, if verbose then trace
 }
 
-/*handler: new connections are handled here, this will read the connection and print the message received
-lets assume we receive json messages on this*/
+/*
+handler: new connections are handled here, this will read the connection and print the message received
+lets assume we receive json messages on this
+*/
 func handler(c net.Conn) {
 	log.Printf("Client connected [%s]", c.RemoteAddr().Network())
 	buff := make([]byte, 512)
