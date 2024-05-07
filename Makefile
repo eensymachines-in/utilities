@@ -8,6 +8,5 @@ publish:
 	git push origin master --ipv4
 	@echo "Name of tag you want this commit to have: ";\
 	read TAG;
-	git tag -a $$(TAG) 
+	git tag -a $$(TAG) -m "another release worthy tagging of the commit"
 	git push origin --tags 
-	
