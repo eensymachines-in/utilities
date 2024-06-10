@@ -2,7 +2,6 @@ package utilities
 
 import (
 	"os"
-	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -44,10 +43,9 @@ func SetUpLog() func() {
 		log.SetLevel(log.DebugLevel) // for development
 	}
 	return func() {
-		sync.OnceFunc(func() {
-			if f != nil {
-				f.Close()
-			}
-		})
+		if f != nil {
+			f.Close()
+		}
+		f = nil // so that reattempts to close such a file pointer will be blocked
 	}
 }
