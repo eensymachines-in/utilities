@@ -8,41 +8,45 @@ import (
 )
 
 // SetUpLog : here this is set up the most vanilla log preferences to get any module started
-func SetUpLog() {
-	// log.SetFormatter(&log.TextFormatter{
-	// 	DisableColors: false,
-	// 	FullTimestamp: true,
-	// })
-	log.SetFormatter(&log.JSONFormatter{})
+// Once upon the program exit return function can help close the log file if its not nil
+// For most of thhe projects that we do here at eensymachines such logging setup in quite useful
+func SetUpLog() func() {
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: false,
+		FullTimestamp: false,
+		PadLevelText:  true,
+	})
 	log.SetReportCaller(false)
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.InfoLevel) // default is info level, if verbose then trace
-}
-
-// CustomLog : depending on the flags sent in this can alter the log levels and redirect the output
-// send in the logfile path so that incase of file logging this can create and and setupout to the file
-func CustomLog(flog, fverbose bool, logFile string) func() {
-	var lf *os.File
-	if flog {
-		lf, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
+	log.SetLevel(log.DebugLevel) // default is debug , the most verbose logging
+	// file logs or logging to standard output
+	val := os.Getenv("FLOG")
+	var f *os.File
+	var err error
+	if val == "1" {
+		f, err = os.OpenFile(os.Getenv("LOGF"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664) // file for logs
 		if err != nil {
-			log.Error(err)
-			log.Error("Failed to connect to log file, kindly check the privileges")
-			// If this fails to connect to log file, it defaults to sending the log output to stdout
-		} else {
-			log.Infof("Check log file for entries @ %s", logFile)
-			log.SetOutput(lf)
+			log.SetOutput(os.Stdout) // error in opening log file
+			log.Warn("Failed to open log file, log output set to stdout")
 		}
+		log.SetOutput(f) // log output set to file direction
+		log.Infof("log output is set to file: %s", os.Getenv("LOGF"))
+
+	} else {
+		log.SetOutput(os.Stdout)
+		log.Info("log output to stdout")
 	}
-	if fverbose {
-		log.Info("Verbose logging")
-		log.SetLevel(log.TraceLevel)
+	// how verbose would you want the logging to be
+	val = os.Getenv("SILENT")
+	if val == "1" {
+		log.SetLevel(log.ErrorLevel) // for production
+	} else {
+		log.SetLevel(log.DebugLevel) // for development
 	}
-	var once sync.Once
 	return func() {
-		once.Do(func() {
-			if lf != nil {
-				lf.Close()
+		sync.OnceFunc(func() {
+			if f != nil {
+				f.Close()
 			}
 		})
 	}
